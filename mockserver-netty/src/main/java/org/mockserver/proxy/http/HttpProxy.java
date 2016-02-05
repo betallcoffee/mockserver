@@ -10,6 +10,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.filters.LogFilter;
+import org.mockserver.mock.MockServerMatcher;
 import org.mockserver.proxy.Proxy;
 import org.mockserver.stop.StopEventQueue;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ public class HttpProxy implements Proxy {
     // proxy
     private final LogFilter logFilter = new LogFilter();
     private final SettableFuture<String> hasStarted;
+    private final MockServerMatcher mockServerMatcher = new MockServerMatcher();
     // netty
     private final EventLoopGroup bossGroup = new NioEventLoopGroup();
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -65,7 +67,7 @@ public class HttpProxy implements Proxy {
                             .option(ChannelOption.SO_BACKLOG, 1024)
                             .channel(NioServerSocketChannel.class)
                             .childOption(ChannelOption.AUTO_READ, true)
-                            .childHandler(new HttpProxyUnificationHandler())
+                            .childHandler(new HttpProxyUnificationHandler(mockServerMatcher))
                             .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                             .childAttr(HTTP_PROXY, HttpProxy.this)
                             .childAttr(HTTP_CONNECT_SOCKET, new InetSocketAddress(port))

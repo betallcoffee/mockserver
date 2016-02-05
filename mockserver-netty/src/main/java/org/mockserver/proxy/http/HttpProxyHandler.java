@@ -1,9 +1,11 @@
 package org.mockserver.proxy.http;
 
 import com.google.common.net.MediaType;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpServerCodec;
 import org.mockserver.client.netty.NettyHttpClient;
 import org.mockserver.client.serialization.ExpectationSerializer;
 import org.mockserver.client.serialization.HttpRequestSerializer;
@@ -16,10 +18,9 @@ import org.mockserver.filters.LogFilter;
 import org.mockserver.logging.LogFormatter;
 import org.mockserver.mappers.ContentTypeMapper;
 import org.mockserver.mock.Expectation;
-import org.mockserver.model.Body;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.model.HttpResponse;
-import org.mockserver.model.OutboundHttpRequest;
+import org.mockserver.mock.MockServerMatcher;
+import org.mockserver.mock.action.ActionHandler;
+import org.mockserver.model.*;
 import org.mockserver.proxy.Proxy;
 import org.mockserver.proxy.connect.HttpConnectHandler;
 import org.mockserver.proxy.unification.PortUnificationHandler;
@@ -49,6 +50,8 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
     private final boolean onwardSslStatusUnknown;
     private final Filters filters = new Filters();
     private LogFormatter logFormatter = new LogFormatter(logger);
+    private MockServerMatcher mockServerMatcher;
+    private ActionHandler actionHandler;
     // http client
     private NettyHttpClient httpClient = new NettyHttpClient();
     // serializers
@@ -65,6 +68,18 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
         this.onwardSslStatusUnknown = (onwardSslStatusUnknown != null ? onwardSslStatusUnknown : false);
         filters.withFilter(new org.mockserver.model.HttpRequest(), new HopByHopHeaderFilter());
         filters.withFilter(new org.mockserver.model.HttpRequest(), logFilter);
+        actionHandler = new ActionHandler(logFilter);
+    }
+
+    public HttpProxyHandler(Proxy server, MockServerMatcher mockServerMatcher, LogFilter logFilter, Boolean onwardSslStatusUnknown) {
+        super(false);
+        this.server = server;
+        this.mockServerMatcher = mockServerMatcher;
+        this.logFilter = logFilter;
+        this.onwardSslStatusUnknown = (onwardSslStatusUnknown != null ? onwardSslStatusUnknown : false);
+        filters.withFilter(new org.mockserver.model.HttpRequest(), new HopByHopHeaderFilter());
+        filters.withFilter(new org.mockserver.model.HttpRequest(), logFilter);
+        actionHandler = new ActionHandler(logFilter);
     }
 
     @Override
@@ -140,23 +155,41 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
                 ctx.close();
                 server.stop();
 
+            } else if (request.matches("PUT", "/expectation")) {
+
+                Expectation expectation = expectationSerializer.deserialize(request.getBodyAsString());
+                SSLFactory.addSubjectAlternativeName(expectation.getHttpRequest().getFirstHeader(HttpHeaders.Names.HOST));
+                mockServerMatcher.when(expectation.getHttpRequest(), expectation.getTimes(), expectation.getTimeToLive()).thenRespond(expectation.getHttpResponse(false)).thenForward(expectation.getHttpForward()).thenError(expectation.getHttpError()).thenCallback(expectation.getHttpCallback());
+                logFormatter.infoLog("creating expectation:{}", expectation);
+                writeResponse(ctx, request, HttpResponseStatus.CREATED);
+
             } else {
 
-                OutboundHttpRequest outboundHttpRequest = outboundRequest(ctx.channel().attr(HttpProxy.REMOTE_SOCKET).get(), "", filters.applyOnRequestFilters(request));
+                Action handle = null;
+                if (mockServerMatcher != null) handle = mockServerMatcher.handle(request);
 
-                // allow for filter to set request to null
-                if (outboundHttpRequest != null) {
-                    HttpResponse response = sendRequest(outboundHttpRequest);
-                    logFormatter.infoLog(
-                            "returning response:{}" + System.getProperty("line.separator") + " for request as json:{}" + System.getProperty("line.separator") + " as curl:{}",
-                            response,
-                            request,
-                            outboundRequestToCurlSerializer.toCurl(outboundHttpRequest)
-                    );
-                    writeResponse(ctx, request, response);
+                if (handle == null || handle instanceof HttpError) {
+                    OutboundHttpRequest outboundHttpRequest = outboundRequest(ctx.channel().attr(HttpProxy.REMOTE_SOCKET).get(), "", filters.applyOnRequestFilters(request));
+
+                    // allow for filter to set request to null
+                    if (outboundHttpRequest != null) {
+                        HttpResponse response = sendRequest(outboundHttpRequest);
+                        logFormatter.infoLog(
+                                "returning response:{}" + System.getProperty("line.separator") + " for request as json:{}" + System.getProperty("line.separator") + " as curl:{}",
+                                response,
+                                request,
+                                outboundRequestToCurlSerializer.toCurl(outboundHttpRequest)
+                        );
+                        writeResponse(ctx, request, response);
+                    } else {
+                        writeResponse(ctx, request, notFoundResponse());
+                    }
                 } else {
-                    writeResponse(ctx, request, notFoundResponse());
+                    HttpResponse response = actionHandler.processAction(handle, request);
+                    logFormatter.infoLog("returning response:{}" + System.getProperty("line.separator") + " for request:{}", response, request);
+                    writeResponse(ctx, request, response);
                 }
+
 
             }
         } catch (Exception e) {
