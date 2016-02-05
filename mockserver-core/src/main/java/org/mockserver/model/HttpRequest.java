@@ -215,6 +215,17 @@ public class HttpRequest extends Not {
         return this;
     }
 
+    public Parameter getQueryParameters(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Name must not be null");
+        }
+        Parameter parameter = queryStringParameters.get(string(name));
+        if (parameter != null) {
+            return parameter;
+        }
+        throw new IllegalArgumentException("Name not be contains");
+    }
+
     public List<Parameter> getQueryStringParameters() {
         return new ArrayList<Parameter>(queryStringParameters.values());
     }

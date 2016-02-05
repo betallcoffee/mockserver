@@ -13,11 +13,16 @@ import org.mockserver.matchers.Times;
 import org.mockserver.mock.Expectation;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
+import org.mockserver.model.NottableString;
+import org.mockserver.model.Parameter;
 import org.mockserver.verify.Verification;
 import org.mockserver.verify.VerificationSequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -208,5 +213,35 @@ public class LogFilter implements ResponseFilter, RequestFilter {
         }
 
         return failureMessage;
+    }
+
+    public synchronized void dumpToExpectation(HttpRequest httpRequest, Parameter caseName) {
+        ExpectationSerializer expectationSerializer = new ExpectationSerializer();
+        if (httpRequest != null) {
+            HttpRequestMatcher httpRequestMatcher = matcherBuilder.transformsToMatcher(httpRequest);
+            for (Map.Entry<HttpRequest, HttpResponse> entry : requestResponseLog.entrySet()) {
+                if (httpRequestMatcher.matches(entry.getKey(), true)) {
+                    String expectationJson = (expectationSerializer.serialize(new Expectation(entry.getKey(), Times.once(), TimeToLive.unlimited()).thenRespond(entry.getValue())));
+                    File file = new File("web/case/");
+                    if (!file.exists()) {
+                        file.mkdirs();
+                    }
+
+                    NottableString value = caseName.getValues().get(0);
+                    file = new File("web/case/" + value.getValue());
+                    try {
+                        file.createNewFile();
+                        FileWriter fileWriter = new FileWriter(file);
+                        fileWriter.write(expectationJson);
+                        fileWriter.flush();
+                        fileWriter.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    break;
+                }
+            }
+        }
     }
 }

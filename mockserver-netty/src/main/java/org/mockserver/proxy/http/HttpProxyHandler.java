@@ -155,6 +155,11 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
                 ctx.close();
                 server.stop();
 
+            } else if (request.matches("PUT", "/dumpToExpectation")) {
+
+                logFilter.dumpToExpectation(httpRequestSerializer.deserialize(request.getBodyAsString()), request.getQueryParameters("caseName"));
+                writeResponse(ctx, request, HttpResponseStatus.ACCEPTED);
+
             } else if (request.matches("PUT", "/expectation")) {
 
                 Expectation expectation = expectationSerializer.deserialize(request.getBodyAsString());

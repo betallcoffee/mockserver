@@ -83,3 +83,7 @@ custom_tmp
 # drone.io build testing #
 ##########################
 drone.io
+
+
+# web root #
+web

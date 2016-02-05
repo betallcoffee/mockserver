@@ -219,4 +219,16 @@ public class ProxyClient extends AbstractClient {
         HttpResponse httpResponse = sendRequest(request().withMethod("PUT").withPath(calculatePath("retrieve")).withBody(httpRequest != null ? httpRequestSerializer.serialize(httpRequest) : ""));
         return httpResponse.getBodyAsString();
     }
+
+
+    /**
+     * Dump the recorded requests that match the httpRequest parameter as a JSON expectation
+     *
+     * @param httpRequest the http request that is matched against when deciding whether to return each expectation.
+     * @param caseName the file name will contain expectation.
+     */
+    public ProxyClient dumpToExpectationJSON(HttpRequest httpRequest, String caseName) {
+        sendRequest(request().withMethod("PUT").withPath(calculatePath("dumpToExpectation?caseName=" + caseName)).withBody(httpRequest != null ? httpRequestSerializer.serialize(httpRequest) : ""));
+        return this;
+    }
 }
