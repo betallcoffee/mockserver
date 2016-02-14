@@ -32,7 +32,7 @@
 		<link id="ie9style" href="css/ie9.css" rel="stylesheet">
 	<![endif]-->
 		
-	<!-- start: Favicon -->
+	<!-- start: Favicon
 	<link rel="shortcut icon" href="img/favicon.ico">
 	<!-- end: Favicon -->
 		
@@ -102,32 +102,26 @@
 						<table class="table table-striped table-bordered bootstrap-datatable datatable">
 						  <thead>
 							  <tr>
-								  <th>Username</th>
-								  <th>Date registered</th>
-								  <th>Role</th>
-								  <th>Status</th>
-								  <th>Actions</th>
+								  <th>Method</th>
+								  <th>Path</th>
+								  <th>Headers</th>
+								  <th>Cookies</th>
+								  <th>Parameter</th>
+                                  <th>Actions</th>
 							  </tr>
 						  </thead>   
 						  <tbody>
 							<tr>
-								<td>Dennis Ji</td>
-								<td class="center">2012/03/01</td>
-								<td class="center">Member</td>
+								<td>GET</td>
+								<td class="center">/scenic/ScenicIndex</td>
+								<td class="center">headers</td>
 								<td class="center">
-									<span class="label label-warning">Pending</span>
+									<span class="label label-warning">Cookies</span>
 								</td>
+                                <td class="center">parameters</td>
 								<td class="center">
-									<a class="btn btn-success" href="#">
-										<i class="halflings-icon white zoom-in"></i>                                            
-									</a>
-									<a class="btn btn-info" href="#">
-										<i class="halflings-icon white edit"></i>                                            
-									</a>
-									<a class="btn btn-danger" href="#">
-										<i class="halflings-icon white trash"></i> 
-										
-									</a>
+									<a class="btn btn-success" href="#">mock</a>
+									<a class="btn btn-info" href="#">detail</a>                                           
 								</td>
 							</tr>
 						  </tbody>
@@ -148,7 +142,7 @@
 						</div>
 					</div>
 					<div class="box-content">
-						<table class="table table-bordered table-striped table-condensed">
+						<table class="table table-bordered table-striped table-condensed datatable">
 							  <thead>
 								  <tr>
 									  <th>Username</th>
@@ -200,18 +194,6 @@
 								</tr>                                   
 							  </tbody>
 						 </table>  
-						 <div class="pagination pagination-centered">
-						  <ul>
-							<li><a href="#">Prev</a></li>
-							<li class="active">
-							  <a href="#">1</a>
-							</li>
-							<li><a href="#">2</a></li>
-							<li><a href="#">3</a></li>
-							<li><a href="#">4</a></li>
-							<li><a href="#">Next</a></li>
-						  </ul>
-						</div>     
 					</div>
 				</div><!--/span-->
 			</div><!--/row-->
@@ -304,6 +286,16 @@
 		<script src="js/retina.js"></script>
 
 		<script src="js/custom.js"></script>
+        
+        <script src="js/proxyClient.js"></script>
+        
+        <script>
+        $(document).ready(function() {
+            var client = proxyClient("localhost", 1080);
+            var response = client.retrieve();
+            console.log(response);
+        })
+        </script>
 	<!-- end: JavaScript-->
 	
 </body>

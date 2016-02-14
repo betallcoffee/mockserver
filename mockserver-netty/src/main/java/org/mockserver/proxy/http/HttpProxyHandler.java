@@ -124,7 +124,7 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
             } else if (request.matches("PUT", "/retrieve")) {
 
                 HttpRequest[] requests = logFilter.retrieve(httpRequestSerializer.deserialize(request.getBodyAsString()));
-                writeResponse(ctx, request, HttpResponseStatus.OK, httpRequestSerializer.serialize(requests), "application/json");
+                writeResponseCORS(ctx, request, HttpResponseStatus.OK, httpRequestSerializer.serialize(requests), "application/json");
 
             } else if (request.matches("PUT", "/verify")) {
 
@@ -158,7 +158,7 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
             } else if (request.matches("PUT", "/dumpToExpectation")) {
 
                 logFilter.dumpToExpectation(httpRequestSerializer.deserialize(request.getBodyAsString()), request.getQueryParameters("caseName"));
-                writeResponse(ctx, request, HttpResponseStatus.ACCEPTED);
+                writeResponseCORS(ctx, request, HttpResponseStatus.ACCEPTED);
 
             } else if (request.matches("PUT", "/expectation")) {
 
@@ -166,7 +166,13 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
                 SSLFactory.addSubjectAlternativeName(expectation.getHttpRequest().getFirstHeader(HttpHeaders.Names.HOST));
                 mockServerMatcher.when(expectation.getHttpRequest(), expectation.getTimes(), expectation.getTimeToLive()).thenRespond(expectation.getHttpResponse(false)).thenForward(expectation.getHttpForward()).thenError(expectation.getHttpError()).thenCallback(expectation.getHttpCallback());
                 logFormatter.infoLog("creating expectation:{}", expectation);
-                writeResponse(ctx, request, HttpResponseStatus.CREATED);
+                writeResponseCORS(ctx, request, HttpResponseStatus.CREATED);
+
+            } else if (request.matches("OPTIONS", "/retrieve") ||
+                    request.matches("OPTIONS", "/expectation") ||
+                    request.matches("OPTIONS", "/dumpToExpectation")) {
+
+                writeResponseCORS(ctx, request, HttpResponseStatus.OK);
 
             } else {
 
@@ -223,6 +229,22 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
                         .withStatusCode(responseStatus.code())
                         .withBody(body)
                         .updateHeader(header(HttpHeaders.Names.CONTENT_TYPE, contentType + "; charset=utf-8"))
+        );
+    }
+
+    private void writeResponseCORS(ChannelHandlerContext ctx, HttpRequest request, HttpResponseStatus responseStatus) {
+        writeResponseCORS(ctx, request, responseStatus, "", "application/json");
+    }
+
+    private void writeResponseCORS(ChannelHandlerContext ctx, HttpRequest request, HttpResponseStatus responseStatus, String body, String contentType) {
+        writeResponse(ctx, request,
+                response()
+                        .withStatusCode(responseStatus.code())
+                        .withBody(body)
+                        .updateHeader(header(HttpHeaders.Names.CONTENT_TYPE, contentType + "; charset=utf-8"))
+                        .updateHeader(header(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, "*"))
+                        .updateHeader(header(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "PUT"))
+                        .updateHeader(header(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, "content-type"))
         );
     }
 
