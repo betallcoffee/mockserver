@@ -215,7 +215,7 @@ public class LogFilter implements ResponseFilter, RequestFilter {
         return failureMessage;
     }
 
-    public synchronized void dumpToExpectation(HttpRequest httpRequest, Parameter caseName) {
+    public synchronized void dumpToCase(HttpRequest httpRequest, Parameter caseName) {
         ExpectationSerializer expectationSerializer = new ExpectationSerializer();
         if (httpRequest != null) {
             HttpRequestMatcher httpRequestMatcher = matcherBuilder.transformsToMatcher(httpRequest);

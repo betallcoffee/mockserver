@@ -1,11 +1,9 @@
 package org.mockserver.proxy.http;
 
 import com.google.common.net.MediaType;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpServerCodec;
 import org.mockserver.client.netty.NettyHttpClient;
 import org.mockserver.client.serialization.ExpectationSerializer;
 import org.mockserver.client.serialization.HttpRequestSerializer;
@@ -155,9 +153,9 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
                 ctx.close();
                 server.stop();
 
-            } else if (request.matches("PUT", "/dumpToExpectation")) {
+            } else if (request.matches("PUT", "/dumpToCase")) {
 
-                logFilter.dumpToExpectation(httpRequestSerializer.deserialize(request.getBodyAsString()), request.getQueryParameters("caseName"));
+                logFilter.dumpToCase(httpRequestSerializer.deserialize(request.getBodyAsString()), request.getQueryParameters("caseName"));
                 writeResponseCORS(ctx, request, HttpResponseStatus.ACCEPTED);
 
             } else if (request.matches("PUT", "/expectation")) {
@@ -170,7 +168,7 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
             } else if (request.matches("OPTIONS", "/retrieve") ||
                     request.matches("OPTIONS", "/expectation") ||
-                    request.matches("OPTIONS", "/dumpToExpectation")) {
+                    request.matches("OPTIONS", "/dumpToCase")) {
 
                 writeResponseCORS(ctx, request, HttpResponseStatus.OK);
 

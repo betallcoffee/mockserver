@@ -157,6 +157,29 @@ var proxyClient = function (host, port) {
         }
         return _this;
     };
+    
+    /**
+     * Pretty-print the json for all requests / responses that match the specified path
+     * as Expectations case to the $caseName.js.
+     *
+     * @param pathOrRequestMatcher  if a string is passed in the value will be treated as the path to
+     *                              decide which recorded requests to cleared, however if an object is
+     *                              passed in the value will be treated as a full request matcher object
+     * @param caseName  the case filename
+     */
+    var dumpToCaseJSON = function (pathOrRequestMatcher, caseName) {
+        if (caseName) {
+            xmlhttp.open("PUT", proxyUrl + "/dumpToCase?caseName=" + caseName, false);
+            xmlhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+            if (typeof pathOrRequestMatcher === "string") {
+                xmlhttp.send(JSON.stringify(createResponseMatcher(pathOrRequestMatcher)));
+            } else if (pathOrRequestMatcher) {
+                xmlhttp.send(JSON.stringify(pathOrRequestMatcher));
+            }
+        }
+
+        return _this;
+    };
 
     var _this = {
         retrieve: retrieve,
@@ -164,7 +187,8 @@ var proxyClient = function (host, port) {
         verifySequence: verifySequence,
         reset: reset,
         clear: clear,
-        dumpToLogs: dumpToLogs
+        dumpToLogs: dumpToLogs,
+        dumpToCaseJSON: dumpToCaseJSON
     };
-    return  _this;
+    return _this;
 };

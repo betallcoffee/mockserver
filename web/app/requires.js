@@ -2,9 +2,18 @@ Vue.component('require', {
   template: '#require',
   props: ['item'],
   methods: {
-      mock: function() {
+      dump: function() {
           console.log('liangliang' + JSON.stringify(this.item))
-      }
+          var path = this.item.path
+          var pathComponents = path.split('/')
+          var caseName = pathComponents.pop()
+          caseName=prompt("Please input case name:", caseName + ".js");
+          var client = proxyClient('localhost', 1080);
+          client.dumpToCaseJSON(this.item, caseName)
+      },
+      detail: function() {
+          
+      },
   }
 })
 
