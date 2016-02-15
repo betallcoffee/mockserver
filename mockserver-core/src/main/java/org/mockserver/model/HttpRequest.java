@@ -226,6 +226,11 @@ public class HttpRequest extends Not {
         throw new IllegalArgumentException("Name not be contains");
     }
 
+    public String getQueryStringParam(String name) {
+        Parameter parameter = getQueryParameters(name);
+        return parameter.getValues().get(0).getValue();
+    }
+
     public List<Parameter> getQueryStringParameters() {
         return new ArrayList<Parameter>(queryStringParameters.values());
     }

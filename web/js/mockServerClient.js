@@ -107,6 +107,19 @@ var mockServerClient = function (host, port) {
         return mockAnyResponse(createExpectation(path, responseBody, statusCode));
     };
     /**
+     * Setup an expectation in the MockServer by specifying the caseName
+     * for example:
+     *
+     *   mockServerClient("localhost", 1080).mockCaseResponse('caseName');
+     *
+     * @param caseName the case file name in web/case dir.
+     */
+    var mockCaseResponse = function (caseName) {
+        xmlhttp.open("PUT", mockServerUrl + "/expectationCase?caseName=" + caseName, false);
+        xmlhttp.send(caseName);
+        return _this;
+    };
+    /**
      * Override the default headers that are used to specify the response headers in mockSimpleResponse(...)
      * (note: if you use mockAnyResponse(...) the default headers are not used)
      * for example:
@@ -265,6 +278,7 @@ var mockServerClient = function (host, port) {
     var _this = {
         mockAnyResponse: mockAnyResponse,
         mockSimpleResponse: mockSimpleResponse,
+        mockCaseResponse: mockCaseResponse,
         setDefaultHeaders: setDefaultHeaders,
         verify: verify,
         verifySequence: verifySequence,

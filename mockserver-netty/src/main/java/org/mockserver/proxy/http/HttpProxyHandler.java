@@ -166,9 +166,18 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
                 logFormatter.infoLog("creating expectation:{}", expectation);
                 writeResponseCORS(ctx, request, HttpResponseStatus.CREATED);
 
+            } else if (request.matches("PUT", "/expectationCase")) {
+
+                Expectation expectation = expectationSerializer.deserializeCase(request.getQueryStringParam("caseName"));
+                SSLFactory.addSubjectAlternativeName(expectation.getHttpRequest().getFirstHeader(HttpHeaders.Names.HOST));
+                mockServerMatcher.when(expectation.getHttpRequest(), expectation.getTimes(), expectation.getTimeToLive()).thenRespond(expectation.getHttpResponse(false)).thenForward(expectation.getHttpForward()).thenError(expectation.getHttpError()).thenCallback(expectation.getHttpCallback());
+                logFormatter.infoLog("creating expectation:{}", expectation);
+                writeResponseCORS(ctx, request, HttpResponseStatus.CREATED);
+
             } else if (request.matches("OPTIONS", "/retrieve") ||
                     request.matches("OPTIONS", "/expectation") ||
-                    request.matches("OPTIONS", "/dumpToCase")) {
+                    request.matches("OPTIONS", "/dumpToCase") ||
+                    request.matches("OPTIONS", "/expectationCase")) {
 
                 writeResponseCORS(ctx, request, HttpResponseStatus.OK);
 

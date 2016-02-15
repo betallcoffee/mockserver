@@ -10,6 +10,10 @@ import org.mockserver.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -84,5 +88,30 @@ public class ExpectationSerializer {
             }
         }
         return expectations;
+    }
+
+    public Expectation deserializeCase(String caseName) {
+        File file = new File("web/case/" + caseName);
+        try {
+            FileReader fileReader = new FileReader(file);
+
+            Expectation expectation = null;
+            try {
+                ExpectationDTO expectationDTO = objectMapper.readValue(fileReader, ExpectationDTO.class);
+                if (expectationDTO != null) {
+                    expectation = expectationDTO.buildObject();
+                }
+            } catch (Exception e) {
+                logger.error("Exception while parsing caseName [" + caseName + "] for Expectation", e);
+                throw new RuntimeException("Exception while parsing caseName [" + caseName + "] for Expectation", e);
+            }
+
+            fileReader.close();
+
+            return expectation;
+        } catch (IOException e) {
+            logger.error("Exception while reading caseName [" + caseName + "] for Expectation", e);
+            throw new RuntimeException("Exception while reading caseName [" + caseName + "] for Expectation", e);
+        }
     }
 }
