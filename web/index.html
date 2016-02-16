@@ -148,54 +148,25 @@
 						<table class="table table-bordered table-striped table-condensed datatable">
 							  <thead>
 								  <tr>
-									  <th>Username</th>
-									  <th>Date registered</th>
-									  <th>Role</th>
-									  <th>Status</th>                                          
+									  <th>Actions</th>
+									  <th>Case Name</th>                                         
 								  </tr>
 							  </thead>   
-							  <tbody>
-								<tr>
-									<td>Dennis Ji</td>
-									<td class="center">2012/01/01</td>
-									<td class="center">Member</td>
-									<td class="center">
-										<span class="label label-success">Active</span>
-									</td>                                       
-								</tr>
-								<tr>
-									<td>Dennis Ji</td>
-									<td class="center">2012/02/01</td>
-									<td class="center">Staff</td>
-									<td class="center">
-										<span class="label label-important">Banned</span>
-									</td>                                       
-								</tr>
-								<tr>
-									<td>Dennis Ji</td>
-									<td class="center">2012/02/01</td>
-									<td class="center">Admin</td>
-									<td class="center">
-										<span class="label">Inactive</span>
-									</td>                                        
-								</tr>
-								<tr>
-									<td>Dennis Ji</td>
-									<td class="center">2012/03/01</td>
-									<td class="center">Member</td>
-									<td class="center">
-										<span class="label label-warning">Pending</span>
-									</td>                                       
-								</tr>
-								<tr>
-									<td>Dennis Ji</td>
-									<td class="center">2012/01/21</td>
-									<td class="center">Staff</td>
-									<td class="center">
-										<span class="label label-success">Active</span>
-									</td>                                        
-								</tr>                                   
-							  </tbody>
+							  <template id="case">
+                                <tr>
+                                  <td class="center">
+									<a class="btn btn-success" v-on:click="mock">mock</a>
+									<a class="btn btn-info" v-on:click="detail">detail</a>                                           
+								  </td>
+								  <td>{{ item }}</td>
+                                </tr>
+                              </template>  
+                          
+						      <tbody>
+                                <template v-for="case in cases">
+                                  <tr is="case" :item=case></tr>
+                                </template>
+						      </tbody>
 						 </table>  
 					</div>
 				</div><!--/span-->
@@ -296,7 +267,11 @@
         
         <script src="js/proxyClient.js"></script>
         
+        <script src="app/vuefilter.js"></script>
+        
         <script src="app/requires.js"></script>
+        
+        <script src="app/cases.js"></script>
         
         <script src="app/main.js"></script>
         

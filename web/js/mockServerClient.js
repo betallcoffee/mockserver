@@ -274,6 +274,18 @@ var mockServerClient = function (host, port) {
         }
         return JSON.parse(xmlhttp.responseText);
     };
+    
+    /**
+     * Retrieve the setup Cases,
+     * the cases is retrieved in web/case/ dir.
+     *
+     */
+    var retrieveCases = function () {
+        xmlhttp.open("PUT", mockServerUrl + "/retrieve?type=case", false);
+        xmlhttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        xmlhttp.send();
+        return JSON.parse(xmlhttp.responseText);
+    };
 
     var _this = {
         mockAnyResponse: mockAnyResponse,
@@ -285,7 +297,8 @@ var mockServerClient = function (host, port) {
         reset: reset,
         clear: clear,
         retrieveRequests: retrieveRequests,
-        retrieveExpectations: retrieveExpectations
+        retrieveExpectations: retrieveExpectations,
+        retrieveCases: retrieveCases
     };
     return _this;
 };

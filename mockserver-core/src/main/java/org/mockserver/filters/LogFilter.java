@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -244,4 +245,17 @@ public class LogFilter implements ResponseFilter, RequestFilter {
             }
         }
     }
+
+    public synchronized String[] retrieveCase() {
+        File file = new File("web/case/");
+        return file.list(new FilenameFilter() {
+
+            public boolean accept(File file, String path) {
+                String filename = new File(path).getName();
+                return filename.indexOf(".js") != -1;
+            }
+
+        });
+    }
+
 }

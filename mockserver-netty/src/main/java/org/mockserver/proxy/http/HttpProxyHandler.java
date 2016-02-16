@@ -4,6 +4,7 @@ import com.google.common.net.MediaType;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.json.JSONArray;
 import org.mockserver.client.netty.NettyHttpClient;
 import org.mockserver.client.serialization.ExpectationSerializer;
 import org.mockserver.client.serialization.HttpRequestSerializer;
@@ -121,8 +122,14 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
             } else if (request.matches("PUT", "/retrieve")) {
 
-                HttpRequest[] requests = logFilter.retrieve(httpRequestSerializer.deserialize(request.getBodyAsString()));
-                writeResponseCORS(ctx, request, HttpResponseStatus.OK, httpRequestSerializer.serialize(requests), "application/json");
+                if (request.hasQueryStringParameter("type", "case")) {
+                    String[] cases = logFilter.retrieveCase();
+                    JSONArray array = new JSONArray(cases);
+                    writeResponseCORS(ctx, request, HttpResponseStatus.OK, array.toString(), "application/json");
+                } else {
+                    HttpRequest[] requests = logFilter.retrieve(httpRequestSerializer.deserialize(request.getBodyAsString()));
+                    writeResponseCORS(ctx, request, HttpResponseStatus.OK, httpRequestSerializer.serialize(requests), "application/json");
+                }
 
             } else if (request.matches("PUT", "/verify")) {
 

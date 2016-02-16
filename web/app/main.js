@@ -2,16 +2,17 @@ new Vue({
   el: '#main',
   data: {
     message: 'Hello Vue.js!',
-    requires:[]
+    requires: [],
+    cases: []
   },
   ready: function() {
       var client = proxyClient('localhost', 1080)
-      var response = client.retrieve()
-      console.log(response)
-      this.requires = response
+      this.requires = client.retrieve()
+      console.log(this.requires)
       
       var mockServer = mockServerClient('localhost', 1080)
-      mockServer.mockCaseResponse('ScenicIndex.js')
+      this.cases = mockServer.retrieveCases()
+      console.log(this.cases)
       
   }
 })
