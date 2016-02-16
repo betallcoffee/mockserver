@@ -115,7 +115,7 @@ var mockServerClient = function (host, port) {
      * @param caseName the case file name in web/case dir.
      */
     var mockCaseResponse = function (caseName) {
-        xmlhttp.open("PUT", mockServerUrl + "/expectationCase?caseName=" + caseName, false);
+        xmlhttp.open("PUT", mockServerUrl + "/expectation?type=case&caseName=" + caseName, false);
         xmlhttp.send(caseName);
         return _this;
     };
