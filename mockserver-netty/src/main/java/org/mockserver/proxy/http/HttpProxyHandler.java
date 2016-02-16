@@ -113,7 +113,7 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
                 logFilter.reset();
                 logFormatter.infoLog("resetting all expectations and request logs");
-                writeResponse(ctx, request, HttpResponseStatus.ACCEPTED);
+                writeResponseCORS(ctx, request, HttpResponseStatus.ACCEPTED);
 
             } else if (request.matches("PUT", "/dumpToLog")) {
 
@@ -181,7 +181,8 @@ public class HttpProxyHandler extends SimpleChannelInboundHandler<HttpRequest> {
                     writeResponseCORS(ctx, request, HttpResponseStatus.CREATED);
                 }
 
-            } else if (request.matches("OPTIONS", "/retrieve") ||
+            } else if (request.matches("OPTIONS", "/reset") ||
+                    request.matches("OPTIONS", "/retrieve") ||
                     request.matches("OPTIONS", "/expectation") ||
                     request.matches("OPTIONS", "/dumpToCase")) {
 
