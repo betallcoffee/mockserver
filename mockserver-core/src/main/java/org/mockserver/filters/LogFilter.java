@@ -252,7 +252,7 @@ public class LogFilter implements ResponseFilter, RequestFilter {
 
             public boolean accept(File file, String path) {
                 String filename = new File(path).getName();
-                return filename.indexOf(".js") != -1;
+                return filename.indexOf(".json") != -1;
             }
 
         });
